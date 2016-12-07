@@ -27,8 +27,6 @@
     <!-- Explicit ws-common-util because tranisitivity from xmlrpc-client not working in approved repo routing chain -->
     <dependency org="org.apache.ws.commons.util" name ="ws-commons-util" rev="1.0.2" conf="default_external->default" transitive="false"/>
     
-    <dependency org="openerp" name="openerp-java-report-helper" rev="0.10.0"  conf="default_external->default"/>
-
     <dependency org="junit" name="junit" rev="4.10" transitive="false" conf="test->default" />
     <dependency org="${ivy.artifact.group}" name="pentaho-reporting-engine-classic-core-test"
                 rev="${project.revision}" transitive="false" changing="true" conf="test->default"/>
