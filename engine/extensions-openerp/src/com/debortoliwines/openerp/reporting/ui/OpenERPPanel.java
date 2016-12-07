@@ -1,5 +1,3 @@
-package com.debortoliwines.openerp.reporting.ui;
-
 /*
  *   This file is part of OpenERPJavaReportHelper
  *
@@ -19,23 +17,56 @@ package com.debortoliwines.openerp.reporting.ui;
  *   Copyright 2012 De Bortoli Wines Pty Limited (Australia)
  */
 
+package com.debortoliwines.openerp.reporting.ui;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
-
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import javax.swing.DefaultCellEditor;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListSelectionModel;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.JTree;
+import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.TransferHandler;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-import javax.swing.JTabbedPane;
-import javax.swing.JTree;
 
 import com.debortoliwines.openerp.api.ObjectAdapter;
 import com.debortoliwines.openerp.api.OpenERPXmlRpcProxy;
@@ -47,41 +78,6 @@ import com.debortoliwines.openerp.reporting.di.OpenERPFieldInfo;
 import com.debortoliwines.openerp.reporting.di.OpenERPFilterInfo;
 import com.debortoliwines.openerp.reporting.di.OpenERPHelper;
 import com.debortoliwines.openerp.reporting.di.OpenERPQueryItem;
-
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import javax.swing.JScrollPane;
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import javax.swing.JTextField;
-import javax.swing.JComboBox;
-
-import javax.swing.DefaultListSelectionModel;
-import javax.swing.Icon;
-import javax.swing.JOptionPane;
-import javax.swing.JPasswordField;
-import javax.swing.SwingConstants;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.DefaultComboBoxModel;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import javax.swing.ListSelectionModel;
-import javax.swing.JSplitPane;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
 
 /**
  * Main UI Panel.  This panel can be added to other dialogs to configure data source parameters.
@@ -150,25 +146,11 @@ public class OpenERPPanel extends JPanel {
 				tabbedPane.addTab("Data Source", null, pnlDataSource, null);
 				{
 					txtHost = new JTextField();
-					txtHost.addFocusListener(new FocusAdapter() {
-						@Override
-						public void focusLost(FocusEvent e) {
-							populateDatabase();
-							populateModelCombo();
-						}
-					});
 					txtHost.setColumns(10);
 				}
 				{
 					txtPort = new JTextField();
 					txtPort.setText("8069");
-					txtPort.addFocusListener(new FocusAdapter() {
-						@Override
-						public void focusLost(FocusEvent e) {
-							populateDatabase();
-							populateModelCombo();
-						}
-					});
 					txtPort.setColumns(10);
 				}
 				{
@@ -241,7 +223,15 @@ public class OpenERPPanel extends JPanel {
 				txtCustomFunction = new JTextField();
 				txtCustomFunction.setEditable(false);
 				txtCustomFunction.setColumns(10);
-				
+
+				JButton btnAXOOM = new JButton("Connect");
+				btnAXOOM.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent arg0) {
+						cmbDatabase.removeAllItems();
+						populateDatabase();
+						populateModelCombo();
+					}
+				});
 				JButton btnTest = new JButton("Test");
 				btnTest.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent arg0) {
@@ -263,6 +253,7 @@ public class OpenERPPanel extends JPanel {
 							.addGroup(gl_pnlDataSource.createParallelGroup(Alignment.TRAILING)
 								.addComponent(lblPort, GroupLayout.PREFERRED_SIZE, 114, GroupLayout.PREFERRED_SIZE)
 								.addComponent(lblHost, GroupLayout.PREFERRED_SIZE, 114, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnAXOOM)
 								.addComponent(lblUsername, GroupLayout.PREFERRED_SIZE, 114, GroupLayout.PREFERRED_SIZE)
 								.addComponent(lblCustomDataFunction)
 								.addComponent(lblModelName, GroupLayout.PREFERRED_SIZE, 114, GroupLayout.PREFERRED_SIZE)
@@ -295,6 +286,8 @@ public class OpenERPPanel extends JPanel {
 								.addComponent(txtPort, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 								.addComponent(lblPort))
 							.addPreferredGap(ComponentPlacement.RELATED)
+								.addComponent(btnAXOOM)
+								.addPreferredGap(ComponentPlacement.RELATED)
 							.addGroup(gl_pnlDataSource.createParallelGroup(Alignment.BASELINE)
 								.addComponent(cmbDatabase, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 								.addComponent(lblDatabase))
