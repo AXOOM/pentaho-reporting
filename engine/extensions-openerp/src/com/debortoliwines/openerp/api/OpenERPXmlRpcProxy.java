@@ -126,6 +126,19 @@ public class OpenERPXmlRpcProxy extends XmlRpcClient {
    */
   public static ArrayList<String> getDatabaseList (RPCProtocol protocol, String host, int port) throws XmlRpcException
   {
+		// Hack to make possible to use https protocol:
+		// in case if user's input of the host contains "http" or "https" (protocol://host)
+		// split input, set host to a new value, set protocol to corresponding RPCProtocol
+		if (host.toLowerCase().contains("http")) {
+			String[] parts = host.split("://");
+			String protocol_str = parts[0];
+			host = parts[1];
+			if (protocol_str.equals("https"))
+				protocol = RPCProtocol.RPC_HTTPS;
+			else
+				protocol = RPCProtocol.RPC_HTTP;
+		}
+
     OpenERPXmlRpcProxy client = new OpenERPXmlRpcProxy(protocol, host, port, RPCServices.RPC_DATABASE);
     
     //Retrieve databases

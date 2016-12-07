@@ -53,7 +53,21 @@ public class Session {
    * @param password Password to log into the OpenERP server
    */
   public Session(RPCProtocol protocol, String host, int port, String databaseName, String userName, String password){
-    this.protocol = protocol;
+
+		// Hack to make possible to use https protocol:
+		// in case if user's input of the host contains "http" or "https" (protocol://host)
+		// split input, set host to a new value, set protocol to corresponding RPCProtocol
+		if (host.toLowerCase().contains("http")) {
+			String[] parts = host.split("://");
+			String protocol_str = parts[0];
+			host = parts[1];
+			if (protocol_str.equals("https"))
+				protocol = RPCProtocol.RPC_HTTPS;
+			else
+				protocol = RPCProtocol.RPC_HTTP;
+		}
+
+		this.protocol = protocol;
     this.host = host;
     this.port = port;
     this.databaseName = databaseName;
